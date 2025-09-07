@@ -1,0 +1,69 @@
+<!-- public/admin-dashboard.html -->
+<!DOCTYPE html>
+<html>
+<head><title>CONFIRM License Admin</title></head>
+<body>
+    <h1>CONFIRM License Management</h1>
+    
+    <h2>Create Manual License</h2>
+    <form id="createForm">
+        <input type="password" id="adminKey" placeholder="Admin Key" required><br>
+        <input type="text" id="machineId" placeholder="Machine ID" required><br>
+        <input type="text" id="customerName" placeholder="Customer Name"><br>
+        <input type="email" id="customerEmail" placeholder="Customer Email"><br>
+        <select id="licenseType">
+            <option value="student">Student ($29/year)</option>
+            <option value="monthly">Monthly ($49/month)</option>
+            <option value="quarterly">Quarterly ($129/quarter)</option>
+            <option value="yearly">Yearly ($399/year)</option>
+        </select><br>
+        <input type="date" id="expiresAt" required><br>
+        <button type="submit">Create License</button>
+    </form>
+
+    <h2>Revoke License</h2>
+    <form id="revokeForm">
+        <input type="password" id="revokeAdminKey" placeholder="Admin Key" required><br>
+        <input type="text" id="revokeMachineId" placeholder="Machine ID" required><br>
+        <input type="text" id="reason" placeholder="Reason for revocation"><br>
+        <button type="submit">Revoke License</button>
+    </form>
+
+    <script>
+        document.getElementById('createForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const response = await fetch('/api/admin/create-license', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Admin-Key': document.getElementById('adminKey').value
+                },
+                body: JSON.stringify({
+                    machine_id: document.getElementById('machineId').value,
+                    customer_name: document.getElementById('customerName').value,
+                    customer_email: document.getElementById('customerEmail').value,
+                    license_type: document.getElementById('licenseType').value,
+                    expires_at: document.getElementById('expiresAt').value
+                })
+            });
+            alert(JSON.stringify(await response.json(), null, 2));
+        };
+
+        document.getElementById('revokeForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const response = await fetch('/api/admin/revoke-license', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Admin-Key': document.getElementById('revokeAdminKey').value
+                },
+                body: JSON.stringify({
+                    machine_id: document.getElementById('revokeMachineId').value,
+                    reason: document.getElementById('reason').value
+                })
+            });
+            alert(JSON.stringify(await response.json(), null, 2));
+        };
+    </script>
+</body>
+</html>
