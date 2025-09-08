@@ -1,5 +1,5 @@
 // api/verify-license.js
-// License verification endpoint for deltaV Solutions
+// License verification endpoint - No external dependencies
 
 export default async function handler(req, res) {
   // Set CORS headers
@@ -7,23 +7,17 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Handle preflight OPTIONS request
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
 
-  // Only allow POST requests
   if (req.method !== 'POST') {
-    return res.status(405).json({ 
-      error: 'Method not allowed',
-      message: 'This endpoint only accepts POST requests'
-    });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
     const { machine_id, product, version } = req.body;
 
-    // Validate required fields
     if (!machine_id) {
       return res.status(400).json({
         status: 'invalid',
@@ -32,7 +26,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // Log the request for debugging
     console.log('License check request:', {
       machine_id: machine_id?.substring(0, 8) + '...',
       product,
@@ -40,10 +33,8 @@ export default async function handler(req, res) {
       timestamp: new Date().toISOString()
     });
 
-    // FOR DEVELOPMENT: Allow specific test machine IDs
-    const devMachineIds = ['test123', 'development', 'debug'];
-
-    if (devMachineIds.includes(machine_id)) {
+    // Development license check
+    if (['test123', 'development', 'debug'].includes(machine_id)) {
       return res.json({
         status: 'valid',
         license_type: 'development',
@@ -52,10 +43,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // PRODUCTION LICENSE VALIDATION - Use dynamic import
-    const { createClient } = await import('@supabase/supabase-js');
-
-    // Initialize Supabase client with SERVICE ROLE KEY
+    // Direct Supabase REST API call (no SDK needed)
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -68,18 +56,17 @@ export default async function handler(req, res) {
       });
     }
 
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    // Query Supabase directly with fetch
+    const response = await fetch(`${supabaseUrl}/rest/v1/licenses?machine_id=eq.${machine_id}&status=eq.active&select=*`, {
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json'
+      }
+    });
 
-    // Query Supabase for the license
-    const { data: licenseInfo, error } = await supabase
-      .from('licenses')
-      .select('*')
-      .eq('machine_id', machine_id)
-      .eq('status', 'active')
-      .single();
-
-    if (error && error.code !== 'PGRST116') {
-      console.error('Database error:', error);
+    if (!response.ok) {
+      console.error('Supabase query failed:', response.status);
       return res.status(500).json({
         status: 'invalid',
         message: 'Database error',
@@ -87,14 +74,18 @@ export default async function handler(req, res) {
       });
     }
 
+    const licenses = await response.json();
+
     // If no license found
-    if (!licenseInfo || error?.code === 'PGRST116') {
+    if (!licenses || licenses.length === 0) {
       return res.json({
         status: 'invalid',
         message: 'License not found for this machine',
         buy_url: 'https://www.deltavsolutions.com/purchase'
       });
     }
+
+    const licenseInfo = licenses[0];
     
     // Check if license is expired
     const expiryDate = new Date(licenseInfo.expires_at || licenseInfo.expires);
