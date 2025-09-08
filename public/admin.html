@@ -1,4 +1,3 @@
-<!-- public/admin-dashboard.html -->
 <!DOCTYPE html>
 <html>
 <head><title>CONFIRM License Admin</title></head>
@@ -10,16 +9,20 @@
         <input type="password" id="adminKey" placeholder="Admin Key" required><br>
         <input type="text" id="machineId" placeholder="Machine ID" required><br>
         <input type="text" id="customerName" placeholder="Customer Name"><br>
-        <input type="email" id="customerEmail" placeholder="Customer Email"><br>
-        <select id="licenseType">
-            <option value="student">Student ($29/year)</option>
-            <option value="monthly">Monthly ($49/month)</option>
-            <option value="quarterly">Quarterly ($129/quarter)</option>
-            <option value="yearly">Yearly ($399/year)</option>
+        <input type="email" id="customerEmail" placeholder="Customer Email" required><br>
+        <select id="licenseType" required>
+            <option value="student">Student ($49/year)</option>
+            <option value="startup">Startup ($99/month)</option>
+            <option value="professional">Professional ($199/month)</option>
+            <option value="professional_yearly">Professional ($1,999/year)</option>
+            <option value="enterprise">Enterprise ($499/month)</option>
+            <option value="enterprise_yearly">Enterprise ($4,999/year)</option>
         </select><br>
         <input type="date" id="expiresAt" required><br>
         <button type="submit">Create License</button>
     </form>
+
+    <div id="createResult" style="display:none; margin-top:10px; padding:10px; border:1px solid #ccc;"></div>
 
     <h2>Revoke License</h2>
     <form id="revokeForm">
@@ -29,41 +32,108 @@
         <button type="submit">Revoke License</button>
     </form>
 
-    <script>
-        document.getElementById('createForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const response = await fetch('/api/admin/create-license', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Admin-Key': document.getElementById('adminKey').value
-                },
-                body: JSON.stringify({
-                    machine_id: document.getElementById('machineId').value,
-                    customer_name: document.getElementById('customerName').value,
-                    customer_email: document.getElementById('customerEmail').value,
-                    license_type: document.getElementById('licenseType').value,
-                    expires_at: document.getElementById('expiresAt').value
-                })
-            });
-            alert(JSON.stringify(await response.json(), null, 2));
-        };
+    <div id="revokeResult" style="display:none; margin-top:10px; padding:10px; border:1px solid #ccc;"></div>
 
-        document.getElementById('revokeForm').onsubmit = async (e) => {
+    <h2>Verify License</h2>
+    <form id="verifyForm">
+        <input type="text" id="verifyMachineId" placeholder="Machine ID" required><br>
+        <button type="submit">Verify License</button>
+    </form>
+
+    <div id="verifyResult" style="display:none; margin-top:10px; padding:10px; border:1px solid #ccc;"></div>
+
+    <script>
+        // Create License
+        document.getElementById('createForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const response = await fetch('/api/admin/revoke-license', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Admin-Key': document.getElementById('revokeAdminKey').value
-                },
-                body: JSON.stringify({
-                    machine_id: document.getElementById('revokeMachineId').value,
-                    reason: document.getElementById('reason').value
-                })
-            });
-            alert(JSON.stringify(await response.json(), null, 2));
-        };
+            const resultDiv = document.getElementById('createResult');
+            
+            try {
+                const response = await fetch('/api/admin/create-license', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': document.getElementById('adminKey').value
+                    },
+                    body: JSON.stringify({
+                        machine_id: document.getElementById('machineId').value,
+                        customer_name: document.getElementById('customerName').value,
+                        customer_email: document.getElementById('customerEmail').value,
+                        license_type: document.getElementById('licenseType').value,
+                        expires_at: document.getElementById('expiresAt').value
+                    })
+                });
+                
+                const result = await response.json();
+                resultDiv.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                resultDiv.style.display = 'block';
+                
+                if (result.success) {
+                    document.getElementById('createForm').reset();
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
+                resultDiv.style.display = 'block';
+            }
+        });
+
+        // Revoke License
+        document.getElementById('revokeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('revokeResult');
+            
+            try {
+                const response = await fetch('/api/admin/revoke-license', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': document.getElementById('revokeAdminKey').value
+                    },
+                    body: JSON.stringify({
+                        machine_id: document.getElementById('revokeMachineId').value,
+                        reason: document.getElementById('reason').value
+                    })
+                });
+                
+                const result = await response.json();
+                resultDiv.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                resultDiv.style.display = 'block';
+                
+                if (result.success) {
+                    document.getElementById('revokeForm').reset();
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
+                resultDiv.style.display = 'block';
+            }
+        });
+
+        // Verify License
+        document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('verifyResult');
+            
+            try {
+                const response = await fetch('/api/verify-license', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        machine_id: document.getElementById('verifyMachineId').value,
+                        product: 'confirm_analyzer',
+                        version: '1.0.0'
+                    })
+                });
+                
+                const result = await response.json();
+                resultDiv.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                resultDiv.innerHTML = `<span style="color: red;">Error: ${error.message}</span>`;
+                resultDiv.style.display = 'block';
+            }
+        });
     </script>
 </body>
 </html>
