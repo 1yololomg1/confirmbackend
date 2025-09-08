@@ -2,6 +2,18 @@
 // License verification endpoint for deltaV Solutions
 
 export default async function handler(req, res) {
+  try {
+    // Use require instead of import
+    const { createClient } = require('@supabase/supabase-js');
+    
+    const supabase = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+    
+    // Rest of your code...
+
+export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
