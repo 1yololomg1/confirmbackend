@@ -2,18 +2,6 @@
 // License verification endpoint for deltaV Solutions
 
 export default async function handler(req, res) {
-  try {
-    // Use require instead of import
-    const { createClient } = require('@supabase/supabase-js');
-    
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
-    
-    // Rest of your code...
-
-export default async function handler(req, res) {
   // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -44,7 +32,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Log the request for debugging (remove in production)
+    // Log the request for debugging
     console.log('License check request:', {
       machine_id: machine_id?.substring(0, 8) + '...',
       product,
@@ -53,11 +41,7 @@ export default async function handler(req, res) {
     });
 
     // FOR DEVELOPMENT: Allow specific test machine IDs
-    const devMachineIds = [
-      'test123',
-      'development',
-      'debug'
-    ];
+    const devMachineIds = ['test123', 'development', 'debug'];
 
     if (devMachineIds.includes(machine_id)) {
       return res.json({
@@ -68,14 +52,15 @@ export default async function handler(req, res) {
       });
     }
 
-      // PRODUCTION LICENSE VALIDATION - Query Supabase
+    // PRODUCTION LICENSE VALIDATION - Use dynamic import
     const { createClient } = await import('@supabase/supabase-js');
 
-    // Initialize Supabase client
+    // Initialize Supabase client with SERVICE ROLE KEY
     const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_ANON_KEY;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
+      console.error('Missing Supabase environment variables');
       return res.status(500).json({
         status: 'invalid',
         message: 'Server configuration error',
@@ -94,6 +79,7 @@ export default async function handler(req, res) {
       .single();
 
     if (error && error.code !== 'PGRST116') {
+      console.error('Database error:', error);
       return res.status(500).json({
         status: 'invalid',
         message: 'Database error',
