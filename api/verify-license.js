@@ -1,8 +1,7 @@
 // api/verify-license.js
-// License verification endpoint - Final working version
+// Properly aligned with your actual table structure
 
 export default async function handler(req, res) {
-  // Set CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -43,7 +42,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // Get environment variables (now properly set by Supabase integration)
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -56,8 +54,8 @@ export default async function handler(req, res) {
       });
     }
 
-    // Query Supabase directly with fetch (no SDK needed)
-    const response = await fetch(`${supabaseUrl}/rest/v1/licenses?machine_id=eq.${machine_id}&status=eq.active&select=*`, {
+    // Query using your actual table structure
+    const response = await fetch(`${supabaseUrl}/rest/v1/licenses?machine_id=eq.${machine_id}&paid=eq.true&select=*`, {
       headers: {
         'apikey': supabaseKey,
         'Authorization': `Bearer ${supabaseKey}`,
@@ -76,37 +74,24 @@ export default async function handler(req, res) {
 
     const licenses = await response.json();
 
-    // If no license found
+    // If no paid license found
     if (!licenses || licenses.length === 0) {
       return res.json({
         status: 'invalid',
-        message: 'License not found for this machine',
+        message: 'No valid license found for this machine',
         buy_url: 'https://www.deltavsolutions.com/purchase'
       });
     }
 
     const licenseInfo = licenses[0];
-    
-    // Check if license is expired
-    const expiryDate = new Date(licenseInfo.expires_at || licenseInfo.expires);
-    const now = new Date();
-    
-    if (expiryDate < now) {
-      return res.json({
-        status: 'invalid',
-        message: 'License expired',
-        expired_on: licenseInfo.expires_at || licenseInfo.expires,
-        buy_url: 'https://www.deltavsolutions.com/renew'
-      });
-    }
 
-    // Valid license found
+    // Valid license found - return using your table's actual fields
     return res.json({
       status: 'valid',
-      license_type: licenseInfo.license_type,
-      expires: licenseInfo.expires_at || licenseInfo.expires,
-      features: licenseInfo.features ? licenseInfo.features.split(',') : [],
-      customer_name: licenseInfo.customer_name
+      license_key: licenseInfo.license_key,
+      customer_email: licenseInfo.customer_email,
+      verified_at: new Date().toISOString(),
+      message: 'License is valid'
     });
 
   } catch (error) {
