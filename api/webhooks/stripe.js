@@ -1,6 +1,3 @@
-// api/webhooks/stripe.js
-
-// ADD THIS CONFIG TO DISABLE BODY PARSING
 export const config = {
   api: {
     bodyParser: false,
@@ -14,42 +11,29 @@ export default async function handler(req, res) {
 
   try {
     const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-    const { createClient } = await import('@supabase/supabase-js');
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
-
-    // Verify webhook signature
+    
     const sig = req.headers['stripe-signature'];
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     
-    let event;
-    try {
-      // GET RAW BODY INSTEAD OF req.body
-      const buf = await buffer(req);
-      event = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
-    } catch (err) {
-      console.error('Webhook signature verification failed:', err.message);
-      return res.status(400).json({ error: 'Webhook signature verification failed' });
-    }
+    const buf = await buffer(req);
+    const event = stripe.webhooks.constructEvent(buf, sig, webhookSecret);
 
-    // Handle the event
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
     switch (event.type) {
       case 'checkout.session.completed':
-        await handleCheckoutCompleted(event.data.object, supabase, stripe);
+        await handleCheckoutCompleted(event.data.object, stripe, supabaseUrl, supabaseKey);
         break;
       case 'invoice.payment_succeeded':
-        await handlePaymentSucceeded(event.data.object, supabase, stripe);
+        await handlePaymentSucceeded(event.data.object, stripe, supabaseUrl, supabaseKey);
         break;
       case 'customer.subscription.deleted':
-        await handleSubscriptionCancelled(event.data.object, supabase);
+        await handleSubscriptionCancelled(event.data.object, supabaseUrl, supabaseKey);
         break;
       case 'invoice.payment_failed':
-        await handlePaymentFailed(event.data.object, supabase);
+        await handlePaymentFailed(event.data.object, supabaseUrl, supabaseKey);
         break;
-      default:
-        console.log(`Unhandled event type: ${event.type}`);
     }
 
     res.json({ received: true });
@@ -60,7 +44,6 @@ export default async function handler(req, res) {
   }
 }
 
-// ADD THIS HELPER FUNCTION
 async function buffer(readable) {
   const chunks = [];
   for await (const chunk of readable) {
@@ -69,126 +52,159 @@ async function buffer(readable) {
   return Buffer.concat(chunks);
 }
 
-// YOUR EXISTING FUNCTIONS STAY THE SAME
-async function handleCheckoutCompleted(session, supabase, stripe) {
-  console.log('Processing checkout completion:', session.id);
-
-  // Get subscription details
+async function handleCheckoutCompleted(session, stripe, supabaseUrl, supabaseKey) {
   const subscription = await stripe.subscriptions.retrieve(session.subscription);
   const customer = await stripe.customers.retrieve(session.customer);
   
-  // Get plan details
-  const priceId = subscription.items.data[0].price.id;
-  const { data: plan } = await supabase
-    .from('subscription_plans')
-    .select('*')
-    .eq('stripe_price_id', priceId)
-    .single();
-
-  if (!plan) {
-    throw new Error(`Plan not found for price ID: ${priceId}`);
-  }
-
-  // Calculate expiry date
-  const expiryDate = new Date();
-  expiryDate.setMonth(expiryDate.getMonth() + plan.duration_months);
-
-  // Extract machine_id from metadata
   const machineId = session.metadata?.machine_id;
   if (!machineId) {
     throw new Error('Machine ID not found in checkout session');
   }
 
+  // Get plan details
+  const priceId = subscription.items.data[0].price.id;
+  const planResponse = await fetch(
+    `${supabaseUrl}/rest/v1/subscription_plans?stripe_price_id=eq.${priceId}&select=*`,
+    {
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`
+      }
+    }
+  );
+  const plans = await planResponse.json();
+  const plan = plans[0];
+
+  if (!plan) {
+    throw new Error(`Plan not found for price ID: ${priceId}`);
+  }
+
+  // Calculate expiry
+  const expiryDate = new Date();
+  expiryDate.setMonth(expiryDate.getMonth() + plan.duration_months);
+
   // Create license
-  const { error } = await supabase
-    .from('licenses')
-    .insert({
+  const licenseResponse = await fetch(`${supabaseUrl}/rest/v1/licenses`, {
+    method: 'POST',
+    headers: {
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify({
       machine_id: machineId,
       customer_name: customer.name || session.customer_details?.name,
       customer_email: customer.email || session.customer_details?.email,
       license_type: plan.plan_name,
       status: 'active',
-      features: plan.features,
+      features: plan.features || {},
       expires_at: expiryDate.toISOString(),
       stripe_subscription_id: subscription.id,
       stripe_customer_id: customer.id,
-      stripe_price_id: priceId,
-      last_payment_date: new Date().toISOString(),
-      next_billing_date: new Date(subscription.current_period_end * 1000).toISOString()
-    });
+      paid: true
+    })
+  });
 
-  if (error) {
-    throw new Error(`Failed to create license: ${error.message}`);
+  if (!licenseResponse.ok) {
+    throw new Error(`Failed to create license: ${await licenseResponse.text()}`);
   }
 
+  const newLicense = await licenseResponse.json();
   console.log(`License created for machine: ${machineId}, plan: ${plan.plan_name}`);
 }
 
-async function handlePaymentSucceeded(invoice, supabase, stripe) {
-  // Renew existing license
+async function handlePaymentSucceeded(invoice, stripe, supabaseUrl, supabaseKey) {
   const subscriptionId = invoice.subscription;
   
-  const { data: license, error: fetchError } = await supabase
-    .from('licenses')
-    .select('*')
-    .eq('stripe_subscription_id', subscriptionId)
-    .single();
-
-  if (fetchError || !license) {
+  // Find license by subscription ID
+  const licenseResponse = await fetch(
+    `${supabaseUrl}/rest/v1/licenses?stripe_subscription_id=eq.${subscriptionId}&select=*`,
+    {
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`
+      }
+    }
+  );
+  
+  const licenses = await licenseResponse.json();
+  if (!licenses || licenses.length === 0) {
     console.log('License not found for renewal:', subscriptionId);
     return;
   }
 
-  // Extend expiry date
-  const { data: plan } = await supabase
-    .from('subscription_plans')
-    .select('*')
-    .eq('stripe_price_id', license.stripe_price_id)
-    .single();
+  const license = licenses[0];
+  
+  // Get plan details for renewal period
+  const planResponse = await fetch(
+    `${supabaseUrl}/rest/v1/subscription_plans?plan_name=eq.${license.license_type}&select=*`,
+    {
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`
+      }
+    }
+  );
+  const plans = await planResponse.json();
+  const plan = plans[0];
 
-  const newExpiryDate = new Date(license.expires_at);
-  newExpiryDate.setMonth(newExpiryDate.getMonth() + plan.duration_months);
+  if (plan) {
+    // Extend expiry date
+    const currentExpiry = new Date(license.expires_at);
+    const newExpiry = new Date(currentExpiry);
+    newExpiry.setMonth(newExpiry.getMonth() + plan.duration_months);
 
-  const { error } = await supabase
-    .from('licenses')
-    .update({
-      expires_at: newExpiryDate.toISOString(),
-      last_payment_date: new Date().toISOString(),
-      status: 'active'
-    })
-    .eq('id', license.id);
+    await fetch(`${supabaseUrl}/rest/v1/licenses?id=eq.${license.id}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        expires_at: newExpiry.toISOString(),
+        status: 'active',
+        updated_at: new Date().toISOString()
+      })
+    });
 
-  if (error) {
-    throw new Error(`Failed to renew license: ${error.message}`);
+    console.log(`License renewed for machine: ${license.machine_id}`);
   }
-
-  console.log(`License renewed for machine: ${license.machine_id}`);
 }
 
-async function handleSubscriptionCancelled(subscription, supabase) {
-  const { error } = await supabase
-    .from('licenses')
-    .update({ status: 'cancelled' })
-    .eq('stripe_subscription_id', subscription.id);
-
-  if (error) {
-    throw new Error(`Failed to cancel license: ${error.message}`);
-  }
+async function handleSubscriptionCancelled(subscription, supabaseUrl, supabaseKey) {
+  await fetch(`${supabaseUrl}/rest/v1/licenses?stripe_subscription_id=eq.${subscription.id}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      status: 'cancelled',
+      updated_at: new Date().toISOString()
+    })
+  });
 
   console.log(`License cancelled for subscription: ${subscription.id}`);
 }
 
-async function handlePaymentFailed(invoice, supabase) {
+async function handlePaymentFailed(invoice, supabaseUrl, supabaseKey) {
   const subscriptionId = invoice.subscription;
   
-  const { error } = await supabase
-    .from('licenses')
-    .update({ status: 'suspended' })
-    .eq('stripe_subscription_id', subscriptionId);
-
-  if (error) {
-    throw new Error(`Failed to suspend license: ${error.message}`);
-  }
+  await fetch(`${supabaseUrl}/rest/v1/licenses?stripe_subscription_id=eq.${subscriptionId}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      status: 'suspended',
+      updated_at: new Date().toISOString()
+    })
+  });
 
   console.log(`License suspended for failed payment: ${subscriptionId}`);
 }
