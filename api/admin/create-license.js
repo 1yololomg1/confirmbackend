@@ -1,6 +1,3 @@
-// api/admin/create-license.js
-// Properly aligned with your actual table structure
-
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -14,32 +11,68 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const adminKey = req.headers['x-admin-key'];
+  if (!adminKey || adminKey !== process.env.ADMIN_SECRET_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const { 
+    machine_id, 
+    customer_email, 
+    customer_name, 
+    organization,
+    license_type, 
+    expires_at,
+    features 
+  } = req.body;
+
+  if (!machine_id || !license_type || !expires_at) {
+    return res.status(400).json({ 
+      error: 'Missing required fields: machine_id, license_type, expires_at' 
+    });
+  }
+
   try {
-    // Verify admin authentication
-    const adminKey = req.headers['x-admin-key'];
-    if (!adminKey || adminKey !== process.env.ADMIN_SECRET_KEY) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    const { machine_id, customer_email, license_key } = req.body;
-
-    // Validate required fields for your actual table
-    if (!machine_id) {
-      return res.status(400).json({ error: 'machine_id is required' });
-    }
-
-    if (!license_key) {
-      return res.status(400).json({ error: 'license_key is required' });
-    }
-
     const supabaseUrl = process.env.SUPABASE_URL;
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!supabaseUrl || !supabaseKey) {
-      return res.status(500).json({ error: 'Server configuration error' });
+    // Check if machine already has an active license
+    const existingResponse = await fetch(
+      `${supabaseUrl}/rest/v1/licenses?machine_id=eq.${machine_id}&status=eq.active&select=id`,
+      {
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`
+        }
+      }
+    );
+
+    const existingLicenses = await existingResponse.json();
+    if (existingLicenses && existingLicenses.length > 0) {
+      return res.status(400).json({ 
+        error: 'Machine already has an active license' 
+      });
     }
 
-    // Insert using your actual table structure
+    // Get plan features if not provided
+    let licenseFeatures = features;
+    if (!licenseFeatures) {
+      const planResponse = await fetch(
+        `${supabaseUrl}/rest/v1/subscription_plans?plan_name=eq.${license_type}&select=features`,
+        {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
+          }
+        }
+      );
+      const plans = await planResponse.json();
+      if (plans && plans.length > 0) {
+        licenseFeatures = plans[0].features;
+      }
+    }
+
+    // Create the license
     const response = await fetch(`${supabaseUrl}/rest/v1/licenses`, {
       method: 'POST',
       headers: {
@@ -49,26 +82,39 @@ export default async function handler(req, res) {
         'Prefer': 'return=representation'
       },
       body: JSON.stringify({
-        machine_id: machine_id,
-        license_key: license_key,
-        paid: true,
-        customer_email: customer_email || null,
-        email: customer_email || null,
-        verification_count: 0,
-        last_verified_at: new Date().toISOString()
+        machine_id,
+        customer_email,
+        customer_name,
+        organization,
+        license_type,
+        expires_at,
+        features: licenseFeatures || {},
+        status: 'active',
+        paid: true
       })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Supabase insert failed:', response.status, errorText);
-      return res.status(500).json({ 
-        error: 'Failed to create license',
-        details: errorText 
-      });
+      throw new Error(`Database error: ${errorText}`);
     }
 
     const newLicense = await response.json();
+
+    // Log audit event
+    await fetch(`${supabaseUrl}/rest/v1/license_audit_log`, {
+      method: 'POST',
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        license_id: newLicense[0].id,
+        action: 'create_manual_license',
+        details: { admin_created: true, license_type, expires_at }
+      })
+    });
 
     return res.json({
       success: true,
@@ -77,7 +123,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('Admin create license error:', error);
+    console.error('Create license error:', error);
     return res.status(500).json({ 
       error: 'Internal server error',
       message: error.message 
