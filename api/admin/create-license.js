@@ -23,7 +23,8 @@ export default async function handler(req, res) {
     organization,
     license_type, 
     expires_at,
-    features 
+    features,
+    notes 
   } = req.body;
 
   if (!machine_id || !license_type || !expires_at) {
@@ -54,22 +55,13 @@ export default async function handler(req, res) {
       });
     }
 
-    // Get plan features if not provided
+    // Get plan features if not provided - use our feature definition system
     let licenseFeatures = features;
     if (!licenseFeatures) {
-      const planResponse = await fetch(
-        `${supabaseUrl}/rest/v1/subscription_plans?plan_name=eq.${license_type}&select=features`,
-        {
-          headers: {
-            'apikey': supabaseKey,
-            'Authorization': `Bearer ${supabaseKey}`
-          }
-        }
-      );
-      const plans = await planResponse.json();
-      if (plans && plans.length > 0) {
-        licenseFeatures = plans[0].features;
-      }
+      // Import the feature definitions
+      const { getFeaturesForLicenseType } = await import('./license-features.js');
+      const featureDefinition = getFeaturesForLicenseType(license_type);
+      licenseFeatures = featureDefinition ? featureDefinition.features : {};
     }
 
     // Create the license
@@ -90,7 +82,10 @@ export default async function handler(req, res) {
         expires_at,
         features: licenseFeatures || {},
         status: 'active',
-        paid: true
+        paid: true,
+        notes: notes || null,
+        created_by: 'admin_manual',
+        updated_at: new Date().toISOString()
       })
     });
 
