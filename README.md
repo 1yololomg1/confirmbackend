@@ -26,13 +26,13 @@ A comprehensive license management system for manually assigning licenses to cli
 
 ## Features
 
-✅ **Manual License Creation** - Create licenses for specific clients  
-✅ **6 License Tiers** - Student, Startup, Professional, Enterprise  
-✅ **Advanced Search** - Find licenses by email, machine ID, or customer  
-✅ **Analytics Dashboard** - Revenue tracking and usage statistics  
-✅ **Client Management** - Track customer information and history  
-✅ **License Verification API** - Programmatic license validation  
-✅ **Modern UI** - Beautiful, responsive admin interface  
+- **Manual License Creation** - Create licenses for specific clients  
+- **6 License Tiers** - Student, Startup, Professional, Enterprise  
+- **Advanced Search** - Find licenses by email, machine ID, or customer  
+- **Analytics Dashboard** - Revenue tracking and usage statistics  
+- **Client Management** - Track customer information and history  
+- **License Verification API** - Programmatic license validation  
+- **Modern UI** - Beautiful, responsive admin interface  
 
 ## License Tiers - **ALL GET FULL FEATURES!**
 
@@ -40,15 +40,21 @@ A comprehensive license management system for manually assigning licenses to cli
 
 | Tier | Price | Users | Features |
 |------|-------|-------|----------|
-| 🎓 Student | $49/year | Unlimited | **FULL FEATURES** - Student pricing |
-| 🚀 Startup | $99/month | Unlimited | **FULL FEATURES** - Monthly billing |
-| 💼 Professional | $199/month | Unlimited | **FULL FEATURES** - Standard pricing |
-| 🏢 Enterprise | $499/month | Unlimited | **FULL FEATURES** - Premium pricing |
+| Student | $49/year | Unlimited | **FULL FEATURES** - Student pricing |
+| Startup | $99/month | Unlimited | **FULL FEATURES** - Monthly billing |
+| Professional | $199/month | Unlimited | **FULL FEATURES** - Standard pricing |
+| Enterprise | $499/month | Unlimited | **FULL FEATURES** - Premium pricing |
 
 **What "Full Features" means:**
-✅ All analysis capabilities  ✅ Unlimited users & projects  ✅ Full API access  
-✅ All export formats  ✅ Custom integrations  ✅ White-label reports  
-✅ Advanced security  ✅ Unlimited data retention  ✅ Complete support
+- All analysis capabilities
+- Unlimited users & projects
+- Full API access  
+- All export formats
+- Custom integrations
+- White-label reports  
+- Advanced security
+- Unlimited data retention
+- Complete support
 
 ## API Endpoints
 

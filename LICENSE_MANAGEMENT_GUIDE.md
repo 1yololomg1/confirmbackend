@@ -6,7 +6,7 @@ This is a comprehensive license management system that allows you to manually as
 
 ## Features
 
-### 🎯 Core Features
+### Core Features
 - **Manual License Creation**: Create licenses for specific clients with custom expiration dates
 - **Multi-tier Licensing**: Support for 6 different license tiers with distinct feature sets
 - **License Verification**: API endpoint for applications to verify license validity
@@ -14,7 +14,7 @@ This is a comprehensive license management system that allows you to manually as
 - **Analytics Dashboard**: Comprehensive analytics on license usage and revenue
 - **Search & Filter**: Advanced search capabilities for license management
 
-### 🏆 License Tiers - **ALL CUSTOMERS GET FULL FEATURES!**
+### License Tiers - **ALL CUSTOMERS GET FULL FEATURES!**
 
 > **Important**: All paying customers receive access to ALL features regardless of their payment tier. Tiers are for pricing only, not feature restrictions.
 
@@ -54,7 +54,7 @@ This is a comprehensive license management system that allows you to manually as
 - Complete feature set
 - *Premium pricing tier*
 
-### ✅ What "Full Features" Includes:
+### What "Full Features" Includes:
 - **Analysis**: Basic, Advanced, Premium, Enterprise-level analysis
 - **Users**: Unlimited users and projects
 - **API**: Full API access with unlimited calls

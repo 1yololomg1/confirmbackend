@@ -319,7 +319,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🛡️ CONFIRM License Management</h1>
+            <h1>CONFIRM License Management</h1>
             <p>Comprehensive license management system for manual client licensing</p>
         </div>
         
@@ -333,32 +333,32 @@
         <!-- Create License Tab -->
         <div id="create" class="tab-content active">
             <div class="license-tier-info">
-                <h3>📊 Available License Tiers</h3>
+                <h3>Available License Tiers</h3>
                 <div class="tier-grid">
                     <div class="tier-card">
-                        <div class="tier-name">🎓 Student</div>
+                        <div class="tier-name">Student</div>
                         <div class="tier-price">$49/year</div>
                         <div class="tier-features"><strong>FULL FEATURES</strong> • All capabilities included • Student pricing</div>
                     </div>
                     <div class="tier-card">
-                        <div class="tier-name">🚀 Startup</div>
+                        <div class="tier-name">Startup</div>
                         <div class="tier-price">$99/month</div>
                         <div class="tier-features"><strong>FULL FEATURES</strong> • All capabilities included • Monthly billing</div>
                     </div>
                     <div class="tier-card">
-                        <div class="tier-name">💼 Professional</div>
+                        <div class="tier-name">Professional</div>
                         <div class="tier-price">$199/month • $1,999/year</div>
                         <div class="tier-features"><strong>FULL FEATURES</strong> • All capabilities included • Standard pricing</div>
                     </div>
                     <div class="tier-card">
-                        <div class="tier-name">🏢 Enterprise</div>
+                        <div class="tier-name">Enterprise</div>
                         <div class="tier-price">$499/month • $4,999/year</div>
                         <div class="tier-features"><strong>FULL FEATURES</strong> • All capabilities included • Premium pricing</div>
                     </div>
                 </div>
                 
                 <div style="background: #e8f5e8; border: 2px solid #4caf50; border-radius: 8px; padding: 20px; margin-top: 15px; text-align: center;">
-                    <h4 style="color: #2e7d32; margin: 0 0 10px 0;">✅ Simple Licensing Model</h4>
+                    <h4 style="color: #2e7d32; margin: 0 0 10px 0;">Simple Licensing Model</h4>
                     <p style="color: #2e7d32; margin: 0; font-size: 16px;">
                         <strong>All paying customers get access to ALL features regardless of their payment tier.</strong><br>
                         Tiers are for pricing only - everyone gets the full professional experience!
@@ -369,48 +369,48 @@
             <form id="createForm">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="adminKey">🔑 Admin Key</label>
+                        <label for="adminKey">Admin Key</label>
                         <input type="password" id="adminKey" placeholder="Enter admin key" required>
                     </div>
                     <div class="form-group">
-                        <label for="machineId">🖥️ Machine ID</label>
+                        <label for="machineId">Machine ID</label>
                         <input type="text" id="machineId" placeholder="Enter machine identifier" required>
                     </div>
                     <div class="form-group">
-                        <label for="customerName">👤 Customer Name</label>
+                        <label for="customerName">Customer Name</label>
                         <input type="text" id="customerName" placeholder="Enter customer full name">
                     </div>
                     <div class="form-group">
-                        <label for="customerEmail">📧 Customer Email</label>
+                        <label for="customerEmail">Customer Email</label>
                         <input type="email" id="customerEmail" placeholder="customer@example.com" required>
                     </div>
                     <div class="form-group">
-                        <label for="organization">🏢 Organization</label>
+                        <label for="organization">Organization</label>
                         <input type="text" id="organization" placeholder="Company/Organization name">
                     </div>
                     <div class="form-group">
-                        <label for="licenseType">📋 License Type</label>
+                        <label for="licenseType">License Type</label>
                         <select id="licenseType" required>
                             <option value="">Select license tier</option>
-                            <option value="student">🎓 Student - $49/year</option>
-                            <option value="startup">🚀 Startup - $99/month</option>
-                            <option value="professional">💼 Professional - $199/month</option>
-                            <option value="professional_yearly">💼 Professional - $1,999/year</option>
-                            <option value="enterprise">🏢 Enterprise - $499/month</option>
-                            <option value="enterprise_yearly">🏢 Enterprise - $4,999/year</option>
+                            <option value="student">Student - $49/year</option>
+                            <option value="startup">Startup - $99/month</option>
+                            <option value="professional">Professional - $199/month</option>
+                            <option value="professional_yearly">Professional - $1,999/year</option>
+                            <option value="enterprise">Enterprise - $499/month</option>
+                            <option value="enterprise_yearly">Enterprise - $4,999/year</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="expiresAt">📅 Expiration Date</label>
+                        <label for="expiresAt">Expiration Date</label>
                         <input type="date" id="expiresAt" required>
                     </div>
                     <div class="form-group">
-                        <label for="notes">📝 Notes</label>
+                        <label for="notes">Notes</label>
                         <textarea id="notes" placeholder="Additional notes about this license..." rows="3"></textarea>
                     </div>
                 </div>
                 
-                <button type="submit" class="btn btn-primary">✨ Create License</button>
+                <button type="submit" class="btn btn-primary">Create License</button>
             </form>
 
             <div id="createResult" class="result-box"></div>
@@ -419,7 +419,7 @@
         <!-- Manage Licenses Tab -->
         <div id="manage" class="tab-content">
             <div class="search-section">
-                <h3>🔍 Search & Filter Licenses</h3>
+                <h3>Search & Filter Licenses</h3>
                 <div class="search-grid">
                     <div class="form-group">
                         <label for="searchQuery">Search</label>
@@ -444,12 +444,12 @@
                             <option value="cancelled">Cancelled</option>
                         </select>
                     </div>
-                    <button class="btn btn-info" onclick="searchLicenses()">🔍 Search</button>
+                    <button class="btn btn-info" onclick="searchLicenses()">Search</button>
                 </div>
             </div>
 
             <div class="form-group">
-                <label for="manageAdminKey">🔑 Admin Key</label>
+                <label for="manageAdminKey">Admin Key</label>
                 <input type="password" id="manageAdminKey" placeholder="Enter admin key for management operations">
             </div>
 
@@ -480,12 +480,12 @@
             <form id="verifyForm">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label for="verifyMachineId">🖥️ Machine ID</label>
+                        <label for="verifyMachineId">Machine ID</label>
                         <input type="text" id="verifyMachineId" placeholder="Enter machine ID to verify" required>
                     </div>
                 </div>
                 
-                <button type="submit" class="btn btn-info">🔍 Verify License</button>
+                <button type="submit" class="btn btn-info">Verify License</button>
             </form>
 
             <div id="verifyResult" class="result-box"></div>
@@ -494,11 +494,11 @@
         <!-- Analytics Tab -->
         <div id="analytics" class="tab-content">
             <div class="form-group">
-                <label for="analyticsAdminKey">🔑 Admin Key</label>
+                <label for="analyticsAdminKey">Admin Key</label>
                 <input type="password" id="analyticsAdminKey" placeholder="Enter admin key to view analytics">
             </div>
             
-            <button class="btn btn-info" onclick="loadAnalytics()">📊 Load Analytics</button>
+            <button class="btn btn-info" onclick="loadAnalytics()">Load Analytics</button>
             
             <div id="analyticsResult" class="result-box"></div>
         </div>
@@ -581,7 +581,7 @@
                 if (result.success) {
                     resultDiv.className = 'result-box success';
                     resultDiv.innerHTML = `
-                        <h4>✅ License Created Successfully!</h4>
+                        <h4>License Created Successfully!</h4>
                         <p><strong>Customer:</strong> ${result.license.customer_name || 'N/A'}</p>
                         <p><strong>Email:</strong> ${result.license.customer_email}</p>
                         <p><strong>License Type:</strong> ${result.license.license_type}</p>
@@ -596,13 +596,13 @@
                     setDefaultExpiration();
                 } else {
                     resultDiv.className = 'result-box error';
-                    resultDiv.innerHTML = `<h4>❌ Error</h4><p>${result.error || result.message}</p>`;
+                    resultDiv.innerHTML = `<h4>Error</h4><p>${result.error || result.message}</p>`;
                 }
                 
                 resultDiv.style.display = 'block';
             } catch (error) {
                 resultDiv.className = 'result-box error';
-                resultDiv.innerHTML = `<h4>❌ Network Error</h4><p>${error.message}</p>`;
+                resultDiv.innerHTML = `<h4>Network Error</h4><p>${error.message}</p>`;
                 resultDiv.style.display = 'block';
             }
         });
@@ -753,7 +753,7 @@
                 if (result.status === 'valid') {
                     resultDiv.className = 'result-box success';
                     resultDiv.innerHTML = `
-                        <h4>✅ Valid License</h4>
+                        <h4>Valid License</h4>
                         <p><strong>Customer:</strong> ${result.customer_email}</p>
                         <p><strong>License Type:</strong> ${result.license_type}</p>
                         <p><strong>Expires:</strong> ${new Date(result.expires_at).toLocaleDateString()}</p>
@@ -767,7 +767,7 @@
                 } else {
                     resultDiv.className = 'result-box error';
                     resultDiv.innerHTML = `
-                        <h4>❌ Invalid License</h4>
+                        <h4>Invalid License</h4>
                         <p>${result.message}</p>
                         ${result.action === 'purchase_required' ? `<p><a href="${result.purchase_url}" target="_blank">Purchase License</a></p>` : ''}
                     `;
@@ -776,7 +776,7 @@
                 resultDiv.style.display = 'block';
             } catch (error) {
                 resultDiv.className = 'result-box error';
-                resultDiv.innerHTML = `<h4>❌ Network Error</h4><p>${error.message}</p>`;
+                resultDiv.innerHTML = `<h4>Network Error</h4><p>${error.message}</p>`;
                 resultDiv.style.display = 'block';
             }
         });
@@ -806,7 +806,7 @@
                 if (result.success) {
                     resultDiv.className = 'result-box success';
                     resultDiv.innerHTML = `
-                        <h4>📊 License Analytics</h4>
+                        <h4>License Analytics</h4>
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
                             <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center;">
                                 <div style="font-size: 2em; font-weight: bold; color: #28a745;">${result.stats.total_licenses}</div>
@@ -832,13 +832,13 @@
                     `;
                 } else {
                     resultDiv.className = 'result-box error';
-                    resultDiv.innerHTML = `<h4>❌ Error</h4><p>${result.error}</p>`;
+                    resultDiv.innerHTML = `<h4>Error</h4><p>${result.error}</p>`;
                 }
                 
                 resultDiv.style.display = 'block';
             } catch (error) {
                 resultDiv.className = 'result-box error';
-                resultDiv.innerHTML = `<h4>❌ Network Error</h4><p>${error.message}</p>`;
+                resultDiv.innerHTML = `<h4>Network Error</h4><p>${error.message}</p>`;
                 resultDiv.style.display = 'block';
             }
         }
