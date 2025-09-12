@@ -58,16 +58,21 @@ A comprehensive license management system for manually assigning licenses to cli
 
 ## API Endpoints
 
-### Admin Operations (require X-Admin-Key header)
-- `POST /api/admin/create-license` - Create new license
-- `POST /api/admin/search-licenses` - Search existing licenses  
-- `POST /api/admin/revoke-license` - Revoke license
-- `POST /api/admin/analytics` - Get analytics data
-- `GET /api/admin/client-management` - Manage clients
+**Consolidated API** - All endpoints use `/api/license-api?endpoint=<endpoint-name>`
 
-### License Verification
-- `POST /api/verify-license` - Basic license verification
-- `POST /api/verify-license-enhanced` - Advanced verification with feature checking
+### Secure License Operations
+- `POST /api/license-api?endpoint=machine-fingerprint` - Generate machine fingerprint
+- `POST /api/license-api?endpoint=verify-secure-license` - Verify license with hardware info
+- `POST /api/license-api?endpoint=create-payment-session` - Create Stripe payment session
+
+### Admin Operations (require X-Admin-Key header)
+- `POST /api/license-api?endpoint=admin-analytics` - Get system analytics
+- `POST /api/license-api?endpoint=admin-licenses` - View all licenses
+- `POST /api/license-api?endpoint=admin-create-license` - Manually create license
+- `POST /api/license-api?endpoint=admin-revoke-license` - Revoke license
+
+### Webhook
+- `POST /api/payment-webhook` - Stripe payment webhook (auto-creates licenses)
 
 ## Documentation
 

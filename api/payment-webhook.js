@@ -1,4 +1,4 @@
-// Webhook for automatic license creation after payment
+// Consolidated Stripe webhook for automatic license creation after payment
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -20,33 +20,28 @@ export default async function handler(req, res) {
     if (event.type === 'checkout.session.completed') {
       const session = event.data.object;
       
-      // Extract machine fingerprint and license type from metadata
       const machine_fingerprint = session.metadata.machine_fingerprint;
       const license_type = session.metadata.license_type;
-      const amount_paid = session.amount_total / 100; // Convert from cents
+      const amount_paid = session.amount_total / 100;
       
       if (!machine_fingerprint || !license_type) {
         console.error('Missing required metadata in payment session');
         return res.status(400).json({ error: 'Invalid payment session' });
       }
 
-      // Calculate expiration based on payment tier
       const expirationDate = calculateExpiration(license_type);
       
-      // Create license with minimal data
       const supabaseUrl = process.env.SUPABASE_URL;
       const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
       
       const licenseData = {
-        machine_fingerprint, // Using fingerprint instead of machine_id
+        machine_fingerprint,
         license_type,
         expires_at: expirationDate,
         amount_paid,
         status: 'active',
         created_by: 'payment_webhook',
-        // NO customer email, name, or organization stored
-        // NO personal information retained
-        features: getAllFeatures() // Everyone gets full features
+        features: getAllFeatures()
       };
 
       const response = await fetch(`${supabaseUrl}/rest/v1/secure_licenses`, {
@@ -66,7 +61,7 @@ export default async function handler(req, res) {
 
       const newLicense = await response.json();
 
-      // Log minimal audit event (no personal data)
+      // Log audit event
       await fetch(`${supabaseUrl}/rest/v1/license_audit_log`, {
         method: 'POST',
         headers: {
@@ -77,11 +72,7 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           license_id: newLicense[0].id,
           action: 'license_created_via_payment',
-          details: { 
-            license_type, 
-            amount_paid,
-            payment_session_id: session.id
-          }
+          details: { license_type, amount_paid, payment_session_id: session.id }
         })
       });
 

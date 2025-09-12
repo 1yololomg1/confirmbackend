@@ -29,7 +29,7 @@ class HardwareFingerprint {
         try {
             const hardwareInfo = await this.getHardwareInfo();
             
-            const response = await fetch(`${this.apiBaseUrl}/machine-fingerprint`, {
+            const response = await fetch(`${this.apiBaseUrl}/license-api?endpoint=machine-fingerprint`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -60,7 +60,7 @@ class HardwareFingerprint {
         try {
             const hardwareInfo = await this.getHardwareInfo();
             
-            const response = await fetch(`${this.apiBaseUrl}/verify-secure-license`, {
+            const response = await fetch(`${this.apiBaseUrl}/license-api?endpoint=verify-secure-license`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -88,7 +88,7 @@ class HardwareFingerprint {
         try {
             const { fingerprint } = await this.generateFingerprintAndPaymentURL();
             
-            const response = await fetch(`${this.apiBaseUrl}/create-payment-session`, {
+            const response = await fetch(`${this.apiBaseUrl}/license-api?endpoint=create-payment-session`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

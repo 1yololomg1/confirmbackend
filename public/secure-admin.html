@@ -386,7 +386,7 @@
             resultDiv.className = 'result-box';
             
             try {
-                const response = await fetch('/api/admin/secure-analytics', {
+                const response = await fetch('/api/license-api?endpoint=admin-analytics', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -443,7 +443,7 @@
             }
 
             try {
-                const response = await fetch('/api/admin/secure-licenses', {
+                const response = await fetch('/api/license-api?endpoint=admin-licenses', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -518,7 +518,7 @@
             resultDiv.className = 'result-box';
             
             try {
-                const response = await fetch('/api/verify-secure-license', {
+                const response = await fetch('/api/license-api?endpoint=verify-secure-license', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
