@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Secure License Admin - Oil & Gas Industry</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .security-notice {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px;
+            text-align: center;
+        }
+        
+        .security-notice h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .security-notice p {
+            color: #856404;
+            font-size: 14px;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            background: white;
+            border-bottom: 3px solid #e74c3c;
+            color: #e74c3c;
+        }
+        
+        .tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: block;
+            color: #2c3e50;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(231, 76, 60, 0.3);
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+        
+        .btn-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+        
+        .result-box {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+            background: #fff5f5;
+            display: none;
+        }
+        
+        .result-box.success {
+            border-left-color: #28a745;
+            background: #f8fff8;
+        }
+        
+        .result-box.error {
+            border-left-color: #dc3545;
+            background: #fff8f8;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .licenses-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .licenses-table th,
+        .licenses-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .licenses-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .licenses-table tr:hover {
+            background: #fff5f5;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-expired {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .fingerprint {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8em;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Secure License Management</h1>
+            <p>Oil & Gas Industry - Minimal Data Retention System</p>
+        </div>
+        
+        <div class="security-notice">
+            <h3>SECURITY NOTICE</h3>
+            <p>This system stores minimal data for maximum security. No customer personal information is retained. All licenses are tied to machine fingerprints only.</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('overview')">Overview</button>
+            <button class="tab" onclick="switchTab('licenses')">License Status</button>
+            <button class="tab" onclick="switchTab('verify')">Verify License</button>
+        </div>
+        
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content active">
+            <h3>System Overview</h3>
+            
+            <div class="form-group">
+                <label for="adminKey">Admin Key</label>
+                <input type="password" id="adminKey" placeholder="Enter admin key to view statistics">
+            </div>
+            
+            <button class="btn btn-info" onclick="loadOverview()">Load System Statistics</button>
+            
+            <div id="overviewResult" class="result-box"></div>
+        </div>
+
+        <!-- License Status Tab -->
+        <div id="licenses" class="tab-content">
+            <h3>Active Licenses</h3>
+            <p>View licenses by machine fingerprint (no personal data stored)</p>
+            
+            <div class="form-group">
+                <label for="licenseAdminKey">Admin Key</label>
+                <input type="password" id="licenseAdminKey" placeholder="Enter admin key">
+            </div>
+            
+            <div class="form-group">
+                <label for="fingerprintSearch">Search by Fingerprint (optional)</label>
+                <input type="text" id="fingerprintSearch" placeholder="Enter machine fingerprint to search">
+            </div>
+            
+            <button class="btn btn-info" onclick="loadLicenses()">Load Licenses</button>
+            
+            <table class="licenses-table" id="licensesTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Machine Fingerprint</th>
+                        <th>License Type</th>
+                        <th>Status</th>
+                        <th>Expires</th>
+                        <th>Days Left</th>
+                        <th>Last Verified</th>
+                    </tr>
+                </thead>
+                <tbody id="licensesTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Verify License Tab -->
+        <div id="verify" class="tab-content">
+            <h3>Manual License Verification</h3>
+            <p>Test license verification using hardware information</p>
+            
+            <div class="form-group">
+                <label for="cpuId">CPU ID</label>
+                <input type="text" id="cpuId" placeholder="Enter CPU ID">
+            </div>
+            
+            <div class="form-group">
+                <label for="motherboardId">Motherboard ID</label>
+                <input type="text" id="motherboardId" placeholder="Enter Motherboard ID">
+            </div>
+            
+            <div class="form-group">
+                <label for="biosSerial">BIOS Serial (optional)</label>
+                <input type="text" id="biosSerial" placeholder="Enter BIOS Serial">
+            </div>
+            
+            <div class="form-group">
+                <label for="macAddress">MAC Address (optional)</label>
+                <input type="text" id="macAddress" placeholder="Enter MAC Address">
+            </div>
+            
+            <button class="btn btn-primary" onclick="verifyLicense()">Verify License</button>
+            
+            <div id="verifyResult" class="result-box"></div>
+        </div>
+    </div>
+
+    <script>
+        // Tab switching
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Load system overview
+        async function loadOverview() {
+            const adminKey = document.getElementById('adminKey').value;
+            if (!adminKey) {
+                alert('Please enter admin key');
+                return;
+            }
+
+            const resultDiv = document.getElementById('overviewResult');
+            resultDiv.className = 'result-box';
+            
+            try {
+                const response = await fetch('/api/admin/secure-analytics', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': adminKey
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.className = 'result-box success';
+                    resultDiv.innerHTML = `
+                        <h4>System Statistics</h4>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-number">${result.stats.total_licenses}</div>
+                                <div class="stat-label">Total Licenses</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${result.stats.active_licenses}</div>
+                                <div class="stat-label">Active Licenses</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">${result.stats.expired_licenses}</div>
+                                <div class="stat-label">Expired Licenses</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-number">$${result.stats.total_revenue || 0}</div>
+                                <div class="stat-label">Total Revenue</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.innerHTML = `<h4>Error</h4><p>${result.error}</p>`;
+                }
+                
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                resultDiv.className = 'result-box error';
+                resultDiv.innerHTML = `<h4>Network Error</h4><p>${error.message}</p>`;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        // Load licenses
+        async function loadLicenses() {
+            const adminKey = document.getElementById('licenseAdminKey').value;
+            const fingerprint = document.getElementById('fingerprintSearch').value;
+            
+            if (!adminKey) {
+                alert('Please enter admin key');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/secure-licenses', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Admin-Key': adminKey
+                    },
+                    body: JSON.stringify({
+                        fingerprint_search: fingerprint
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayLicenses(result.licenses);
+                } else {
+                    alert('Error loading licenses: ' + result.error);
+                }
+            } catch (error) {
+                alert('Network error: ' + error.message);
+            }
+        }
+
+        function displayLicenses(licenses) {
+            const table = document.getElementById('licensesTable');
+            const tbody = document.getElementById('licensesTableBody');
+            
+            if (licenses.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: #6c757d;">No licenses found</td></tr>';
+            } else {
+                tbody.innerHTML = licenses.map(license => {
+                    const expiresAt = new Date(license.expires_at);
+                    const isExpired = expiresAt < new Date();
+                    const daysRemaining = Math.ceil((expiresAt - new Date()) / (1000 * 60 * 60 * 24));
+                    
+                    let statusClass = 'status-active';
+                    let statusText = 'Active';
+                    
+                    if (isExpired) {
+                        statusClass = 'status-expired';
+                        statusText = 'Expired';
+                    }
+
+                    return `
+                        <tr>
+                            <td><span class="fingerprint">${license.machine_fingerprint.substring(0, 16)}...</span></td>
+                            <td>${license.license_type}</td>
+                            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                            <td>${expiresAt.toLocaleDateString()}</td>
+                            <td>${isExpired ? 'Expired' : daysRemaining + ' days'}</td>
+                            <td>${license.last_verified_at ? new Date(license.last_verified_at).toLocaleDateString() : 'Never'}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+            
+            table.style.display = 'table';
+        }
+
+        // Verify license manually
+        async function verifyLicense() {
+            const cpuId = document.getElementById('cpuId').value;
+            const motherboardId = document.getElementById('motherboardId').value;
+            const biosSerial = document.getElementById('biosSerial').value;
+            const macAddress = document.getElementById('macAddress').value;
+            
+            if (!cpuId || !motherboardId) {
+                alert('CPU ID and Motherboard ID are required');
+                return;
+            }
+
+            const resultDiv = document.getElementById('verifyResult');
+            resultDiv.className = 'result-box';
+            
+            try {
+                const response = await fetch('/api/verify-secure-license', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        hardware_info: {
+                            cpu_id: cpuId,
+                            motherboard_id: motherboardId,
+                            bios_serial: biosSerial,
+                            mac_address: macAddress
+                        },
+                        product: 'test_verification',
+                        version: '1.0.0'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'valid') {
+                    resultDiv.className = 'result-box success';
+                    resultDiv.innerHTML = `
+                        <h4>Valid License</h4>
+                        <p><strong>License Type:</strong> ${result.license_type}</p>
+                        <p><strong>Expires:</strong> ${new Date(result.expires_at).toLocaleDateString()}</p>
+                        <p><strong>Days Remaining:</strong> ${result.days_remaining}</p>
+                        <p><strong>Verified At:</strong> ${new Date(result.verified_at).toLocaleString()}</p>
+                    `;
+                } else {
+                    resultDiv.className = 'result-box error';
+                    resultDiv.innerHTML = `
+                        <h4>License Status: ${result.status.toUpperCase()}</h4>
+                        <p>${result.message}</p>
+                    `;
+                }
+                
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                resultDiv.className = 'result-box error';
+                resultDiv.innerHTML = `<h4>Network Error</h4><p>${error.message}</p>`;
+                resultDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
